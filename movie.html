@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineStream | Stream Unlimited Movies & Shows</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            500: '#e50914', // Streaming Vibrant Red
+                            600: '#b80710',
+                        },
+                        cyanAccent: '#06b6d4',
+                        purpleAccent: '#a855f7',
+                        darkbg: '#0b0f17',
+                        darkcard: '#151c28',
+                        darkhover: '#1e2838',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f17;
+            color: #f1f5f9;
+        }
+        .glass-header {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .glass-panel {
+            background: rgba(21, 28, 40, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .hero-gradient {
+            background: linear-gradient(0deg, #0b0f17 0%, rgba(11, 15, 23, 0.6) 50%, rgba(11, 15, 23, 0.8) 100%);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f17;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e2838;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #e50914;
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="bg-darkbg text-slate-100 min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+    <header class="fixed top-0 left-0 right-0 z-40 glass-header bg-darkbg/80 border-b border-slate-800/60 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Logo -->
+            <a href="#home" onclick="resetFilters()" class="flex items-center space-x-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-500 to-purpleAccent flex items-center justify-center text-white font-black text-xl shadow-lg shadow-brand-500/30 group-hover:scale-105 transition-transform">
+                    <i class="fas fa-play text-sm"></i>
+                </div>
+                <span class="text-2xl font-black tracking-wider bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                    CINE<span class="text-brand-500">STREAM</span>
+                </span>
+            </a>
+
+            <!-- Desktop Nav Links -->
+            <nav class="hidden lg:flex items-center space-x-8 text-sm font-semibold text-slate-300">
+                <a href="#home" onclick="resetFilters()" class="hover:text-brand-500 transition-colors">Home</a>
+                <a href="#movies" onclick="filterGenre('All')" class="hover:text-brand-500 transition-colors">Explore Movies</a>
+                <a href="#movies" onclick="filterGenre('Action')" class="hover:text-brand-500 transition-colors">Categories</a>
+                <a href="#movies" onclick="toggleWatchlistOnly(true)" class="hover:text-brand-500 transition-colors flex items-center space-x-1.5">
+                    <span>Watchlist</span>
+                    <span id="navWatchlistBadge" class="bg-brand-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">0</span>
+                </a>
+            </nav>
+
+            <!-- Search Bar & Controls -->
+            <div class="hidden sm:flex items-center space-x-4">
+                <div class="relative w-64 md:w-80">
+                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Search movies, genres, cast..." class="w-full pl-10 pr-4 py-2 rounded-xl bg-darkcard/90 border border-slate-700/60 text-sm text-slate-200 placeholder-slate-400 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all">
+                    <i class="fas fa-search absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                    <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-2.5 text-slate-400 hover:text-white text-xs">
+                        <i class="fas fa-times-circle"></i>
+                    </button>
+                </div>
+
+                <button onclick="toggleWatchlistOnly(true)" aria-label="View Watchlist" class="p-2.5 rounded-xl bg-darkcard border border-slate-700/60 text-slate-300 hover:text-brand-500 transition-colors relative">
+                    <i class="fas fa-bookmark text-base"></i>
+                    <span id="watchlistCountIcon" class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-brand-500 text-white text-[10px] font-extrabold flex items-center justify-center">0</span>
+                </button>
+            </div>
+
+            <!-- Mobile Controls Menu Button -->
+            <div class="flex items-center space-x-3 sm:hidden">
+                <button onclick="toggleWatchlistOnly(true)" aria-label="Mobile Watchlist" class="p-2 rounded-lg bg-darkcard text-slate-300 relative">
+                    <i class="fas fa-bookmark text-base"></i>
+                    <span id="mobileWatchlistBadge" class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-brand-500 text-white text-[9px] font-bold flex items-center justify-center">0</span>
+                </button>
+                <button id="mobileMenuBtn" aria-label="Toggle Navigation Drawer" class="p-2 rounded-lg bg-darkcard text-slate-300 focus:outline-none">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Drawer -->
+        <div id="mobileDrawer" class="hidden sm:hidden bg-darkcard border-b border-slate-800 px-4 pt-3 pb-6 space-y-4">
+            <div class="relative w-full">
+                <input type="text" id="mobileSearchInput" oninput="handleMobileSearch()" placeholder="Search movies..." class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-darkbg border border-slate-700 text-sm text-slate-200">
+                <i class="fas fa-search absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+            </div>
+            <div class="flex flex-col space-y-3 font-medium text-slate-300">
+                <a href="#home" onclick="resetFilters(); closeMobileDrawer()" class="px-3 py-2 rounded-lg hover:bg-slate-800">Home</a>
+                <a href="#movies" onclick="filterGenre('All'); closeMobileDrawer()" class="px-3 py-2 rounded-lg hover:bg-slate-800">Explore All Movies</a>
+                <a href="#movies" onclick="toggleWatchlistOnly(true); closeMobileDrawer()" class="px-3 py-2 rounded-lg hover:bg-slate-800">My Watchlist</a>
+            </div>
+        </div>
+    </header>
+
+    <section id="home" class="relative pt-20 min-h-[85vh] flex items-center overflow-hidden">
+        <!-- Hero Background Image Canvas -->
+        <div id="heroBg" class="absolute inset-0 bg-cover bg-center transition-all duration-700 scale-105 filter brightness-75"></div>
+        <div class="absolute inset-0 hero-gradient"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10 w-full">
+            <div class="max-w-2xl space-y-6">
+                <!-- Tag Badges -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="px-3 py-1 rounded-md bg-brand-500 text-white font-extrabold text-xs tracking-wider uppercase">
+                        #1 Featured Movie
+                    </span>
+                    <span id="heroQuality" class="px-2.5 py-0.5 rounded border border-slate-400/50 text-slate-300 font-bold text-xs">
+                        4K Ultra HD
+                    </span>
+                    <span id="heroRating" class="flex items-center space-x-1 text-amber-400 text-sm font-bold">
+                        <i class="fas fa-star"></i>
+                        <span>8.8</span>
+                    </span>
+                </div>
+
+                <!-- Featured Title -->
+                <h1 id="heroTitle" class="text-4xl sm:text-6xl font-black tracking-tight leading-none drop-shadow-lg">
+                    Inception
+                </h1>
+
+                <!-- Details & Tags -->
+                <div id="heroMeta" class="flex flex-wrap items-center gap-3 text-sm font-semibold text-slate-300">
+                    <span id="heroYear">2010</span>
+                    <span>•</span>
+                    <span id="heroDuration">2h 28m</span>
+                    <span>•</span>
+                    <span id="heroGenres" class="text-cyanAccent">Sci-Fi, Action, Thriller</span>
+                </div>
+
+                <!-- Synopsis -->
+                <p id="heroSynopsis" class="text-slate-300 text-base sm:text-lg leading-relaxed line-clamp-3 drop-shadow">
+                    A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.
+                </p>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap items-center gap-4 pt-2">
+                    <button id="heroTrailerBtn" onclick="openTrailerFromHero()" class="px-7 py-3.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-base shadow-lg shadow-brand-500/30 transition-all transform hover:-translate-y-0.5 flex items-center space-x-2">
+                        <i class="fas fa-play"></i>
+                        <span>Watch Trailer</span>
+                    </button>
+                    
+                    <button id="heroWatchlistBtn" onclick="toggleHeroWatchlist()" class="px-6 py-3.5 rounded-xl glass-panel hover:bg-slate-800 text-white font-semibold text-base transition-all flex items-center space-x-2">
+                        <i id="heroWatchlistIcon" class="far fa-bookmark"></i>
+                        <span id="heroWatchlistText">Add to Watchlist</span>
+                    </button>
+
+                    <button id="heroDetailsBtn" onclick="openHeroDetails()" class="px-6 py-3.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 font-semibold text-base transition-colors flex items-center space-x-2">
+                        <i class="fas fa-info-circle"></i>
+                        <span>More Info</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carousel Indicators -->
+        <div class="absolute bottom-6 right-6 z-20 flex space-x-2" id="heroCarouselDots">
+            <!-- Dynamic dots inserted via JS -->
+        </div>
+    </section>
+
+    <section id="movies" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-800">
+            <!-- Active Filter Label -->
+            <div>
+                <h2 id="sectionHeading" class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                    Trending Movies
+                </h2>
+                <p id="sectionSubheading" class="text-sm text-slate-400 mt-1">
+                    Explore top rated movies, trailers, and reviews
+                </p>
+            </div>
+
+            <!-- Sort Dropdown -->
+            <div class="flex items-center space-x-3">
+                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Sort By:</span>
+                <select id="sortSelect" onchange="handleSort()" class="px-4 py-2.5 rounded-xl bg-darkcard border border-slate-700/60 text-sm font-semibold text-slate-200 focus:outline-none focus:border-brand-500">
+                    <option value="popularity">Popularity</option>
+                    <option value="rating">Rating: High to Low</option>
+                    <option value="newest">Release Date: Newest First</option>
+                    <option value="title">Title: A - Z</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Genre Pill Tags Filter Bar -->
+        <div class="flex items-center space-x-2.5 overflow-x-auto py-6 no-scrollbar" id="genreContainer">
+            <!-- Dynamic Category Pills -->
+        </div>
+    </section>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 flex-1">
+        <!-- Empty Watchlist or No Search Results Banner -->
+        <div id="noResultsState" class="hidden py-20 text-center space-y-4">
+            <div class="w-20 h-20 mx-auto rounded-full bg-slate-800/80 flex items-center justify-center text-slate-500 text-3xl">
+                <i class="fas fa-film"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-300">No movies found</h3>
+            <p class="text-sm text-slate-400 max-w-md mx-auto">Try adjusting your search term or selecting a different genre filter to discover movies.</p>
+            <button onclick="resetFilters()" class="px-5 py-2.5 rounded-xl bg-brand-500 text-white font-semibold text-sm">Reset All Filters</button>
+        </div>
+
+        <!-- Movie Cards Responsive Grid -->
+        <div id="movieGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            <!-- Dynamic Movie Cards Inserted by JS -->
+        </div>
+    </main>
+
+    <div id="movieModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 glass-header overflow-y-auto">
+        <div class="bg-darkcard border border-slate-800 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden relative my-8 my-auto transform transition-all">
+            
+            <!-- Close Modal Button -->
+            <button onclick="closeModal()" aria-label="Close Modal" class="absolute top-4 right-4 z-30 w-10 h-10 rounded-full bg-slate-900/80 hover:bg-brand-500 text-slate-300 hover:text-white transition-colors flex items-center justify-center">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+
+            <!-- Modal Body Container -->
+            <div id="modalContainer">
+                <!-- Dynamically populated via JS -->
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-darkcard/80 border-t border-slate-800 text-slate-400 pt-16 pb-12 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-slate-800">
+                <!-- Brand Info -->
+                <div class="md:col-span-5 space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center text-white font-black text-lg">
+                            <i class="fas fa-play text-xs"></i>
+                        </div>
+                        <span class="text-xl font-black tracking-wider text-white">CINE<span class="text-brand-500">STREAM</span></span>
+                    </div>
+                    <p class="text-sm text-slate-400 leading-relaxed max-w-sm">
+                        Your ultimate hub for exploring high-definition movies, streaming trailers, detailed cast metadata, and personalized watchlists.
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="md:col-span-3 space-y-3">
+                    <h4 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Quick Navigation</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#home" onclick="resetFilters()" class="hover:text-brand-500 transition-colors">Trending Movies</a></li>
+                        <li><a href="#movies" onclick="filterGenre('Action')" class="hover:text-brand-500 transition-colors">Action Blockbusters</a></li>
+                        <li><a href="#movies" onclick="filterGenre('Sci-Fi')" class="hover:text-brand-500 transition-colors">Sci-Fi & Fantasy</a></li>
+                        <li><a href="#movies" onclick="toggleWatchlistOnly(true)" class="hover:text-brand-500 transition-colors">Saved Watchlist</a></li>
+                    </ul>
+                </div>
+
+                <!-- Newsletter Subscription -->
+                <div class="md:col-span-4 space-y-3">
+                    <h4 class="text-sm font-bold text-slate-200 uppercase tracking-wider">Stay Updated</h4>
+                    <p class="text-xs text-slate-400">Get notified about upcoming movie premieres and trending trailers.</p>
+                    <form onsubmit="event.preventDefault(); alert('Subscribed successfully!'); this.reset();" class="flex items-center space-x-2">
+                        <input type="email" required placeholder="Enter your email" class="px-3.5 py-2 rounded-xl bg-darkbg border border-slate-700 text-xs text-slate-200 focus:outline-none focus:border-brand-500 w-full">
+                        <button type="submit" class="px-4 py-2 rounded-xl bg-brand-500 text-white text-xs font-bold hover:bg-brand-600 transition-colors">Join</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs space-y-4 sm:space-y-0">
+                <p>© <span id="footerYear"></span> CineStream Inc. Designed for Cinema Lovers.</p>
+                <div class="flex space-x-5 text-base text-slate-400">
+                    <a href="https://twitter.com" target="_blank" rel="noopener" aria-label="Twitter Profile" class="hover:text-brand-500 transition-colors"><i class="fab fa-x-twitter"></i></a>
+                    <a href="https://github.com" target="_blank" rel="noopener" aria-label="GitHub Repository" class="hover:text-brand-500 transition-colors"><i class="fab fa-github"></i></a>
+                    <a href="https://youtube.com" target="_blank" rel="noopener" aria-label="YouTube Channel" class="hover:text-brand-500 transition-colors"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Comprehensive Mock Movie Database
+        const moviesDatabase = [
+            {
+                id: 1,
+                title: "Inception",
+                year: 2010,
+                rating: 8.8,
+                duration: "2h 28m",
+                quality: "4K UHD",
+                genres: ["Sci-Fi", "Action", "Thriller"],
+                poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80",
+                banner: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+                synopsis: "A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+                fullDescription: "Dom Cobb is a skilled thief, the absolute best in the dangerous art of extraction, stealing valuable secrets from deep within the subconscious during the dream state. Cobb's rare ability has made him a coveted player in this treacherous new world of corporate espionage, but it has also made him an international fugitive and cost him everything he has ever loved.",
+                director: "Christopher Nolan",
+                cast: [
+                    { name: "Leonardo DiCaprio", role: "Cobb" },
+                    { name: "Joseph Gordon-Levitt", role: "Arthur" },
+                    { name: "Elliot Page", role: "Ariadne" },
+                    { name: "Tom Hardy", role: "Eames" }
+                ],
+                youtubeEmbed: "https://www.youtube.com/embed/YoHD9XEInc0",
+                popularity: 98
+            },
+            {
+                id: 2,
+                title: "The Dark Knight",
+                year: 2008,
+                rating: 9.0,
+                duration: "2h 32m",
+                quality: "4K UHD",
+                genres: ["Action", "Drama", "Thriller"],
+                poster: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=600&q=80",
+                banner: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?auto=format&fit=crop&w=1200&q=80",
+                synopsis: "When the menace known as the Joker wreaks havoc and chaos on Gotham, Batman must accept one of the greatest psychological tests of his ability to fight injustice.",
+                fullDescription: "With the help of allies Lt. Jim Gordon and DA Harvey Dent, Batman has been able to keep a tight lid on crime in Gotham City. But when a vile young criminal calling himself the Joker suddenly throws the town into chaos, the Caped Crusader begins to tread a fine line between heroism and vigilantism.",
+                director: "Christopher Nolan",
+                cast: [
+                    { name: "Christian Bale", role: "Bruce Wayne / Batman" },
+                    { name: "Heath Ledger", role: "Joker" },
+                    { name: "Aaron Eckhart", role: "Harvey Dent" },
+                    { name: "Gary Oldman", role: "Jim Gordon" }
+                ],
+                youtubeEmbed: "https://www.youtube.com/embed/EXeTwQWrcwY",
+                popularity: 99
+            },
+            {
+                id: 3,
+                title: "Interstellar",
+                year: 2014,
+                rating: 8.7,
+                duration: "2h 49m",
+                quality: "4K UHD",
+                genres: ["Sci-Fi", "Drama", "Adventure"],
+                poster: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80",
+                banner: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1200&q=80",
+                synopsis: "When Earth becomes uninhabitable, a team of ex-NASA pilots undertakes a perilous mission through a wormhole to find a new home for humanity.",
+                fullDescription: "Earth's future has been riddled by disasters, famines, and droughts. There is only one way to ensure mankind's survival: Interstellar travel. A newly discovered wormhole in the far reaches of our solar system allows a team of astronauts to go where no man has gone before.",
+                director: "Christopher Nolan",
+                cast: [
+                    { name: "Matthew McConaughey", role: "Cooper" },
+                    { name: "Anne Hathaway", role: "Brand" },
+                    { name: "Jessica Chastain", role: "Murph" }
+                ],
+                youtubeEmbed: "https://www.youtube.com/embed/zSWdZVtXT7E",
+                popularity: 96
+            },
+            {
+                id: 4,
+                title: "Grand Budapest Hotel",
+                year: 2014,
+                rating: 8.1,
+                duration: "1h 39m",
+                quality: "HD",
+                genres: ["Comedy", "Drama"],
+                poster: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
+                banner: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80",
+                synopsis: "A writer encounters the owner of a high-class European hotel who recounts his early years as a lobby boy under an exceptional concierge.",
+                fullDescription: "The adventures of Gustave H, a legendary concierge at a famous European hotel between the wars, and Zero Moustafa, the lobby boy who becomes his most trusted friend.",
+                director: "Wes Anderson",
+                cast: [
+                    { name: "Ralph Fiennes", role: "M. Gustave" },
+                    { name: "Tony Revolori", role: "Zero" },
+                    { name: "Saoirse Ronan", role: "Agatha" }
+                ],
+                youtubeEmbed: "https://www.youtube.com/embed/1Fg5iWmQjwk",
+                popularity: 84
+            },
+            {
+                id: 5,
+                title: "Cyberpunk Nightmares",
+                year: 2023,
+                rating: 7.9,
+                duration: "2h 10m",
+                quality: "4K UHD",
+                genres: ["Sci-Fi", "Action", "Horror"],
+                poster: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&fit=crop&w=600&q=80",
+                banner: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80",
+                synopsis: "In a neon-drenched metropolis, an augmented hacker unlocks a dark algorithm capable of bending reality itself.",
+                fullDescription: "Set in Neo-Tokyo in 2088, rogue hacker Kael discovers a government artificial intelligence program that infiltrates cybernetic neural implants, unleashing terrifying psychological hallucinations.",
+                director: "Elena Rostova",
+                cast: [
+                    { name: "Sora Takahashi", role: "Kael" },
+                    { name: "Maya Lin", role: "Nyx" }
+                ],
+                youtubeEmbed: "https://www.youtube.com/embed/YoHD9XEInc0",
+                popularity: 89
+            },
+            {
+                id: 6,
+                title: "Silent Whisper",
+                year: 2022,
+                rating: 7.6,
+                duration: "1h 48m",
+                quality: "HD",
+                genres: ["Horror", "Thriller"],
+                poster: "https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&w=600&q=80",
+                banner: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80",
+                synopsis: "An isolated family living in a remote forest realizes they must remain completely silent to escape supernatural predatory forces.",
+                fullDescription: "Deep in the Appalachian mountains, a small homestead survives in absolute silence. When an unexpected radio signal triggers a mysterious entity, their sanctuary becomes a nightmare battlefield.",
+                director: "Marcus Vance",
+                cast: [
+                    { name: "Emily Blunt", role: "Evelyn" },
+                    { name: "John Krasinski", role: "Lee" }
+                ],
+                youtubeEmbed: "https://www.youtube.com/embed/EXeTwQWrcwY",
+                popularity: 82
+            },
+            {
+                id: 7,
+                title: "Eternal Sunrise",
+                year: 2021,
+                rating: 8.4,
+                duration: "2h 05m",
+                quality: "4K UHD",
+                genres: ["Romance", "Drama"],
+                poster: "https://images.unsplash.com/photo-1518173946687-a4c8a383392e?auto=format&fit=crop&w=600&q=80",
+                banner: "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1200&q=80",
+                synopsis: "Two strangers cross paths on a high-speed train across Europe and form an unforgettable emotional connection.",
+                fullDescription: "A poignant exploration of love, timing, and second chances. When Celine and Jesse meet accidentally on a European rail tour, they decide to spend a single night exploring Vienna together before fate pulls them apart.",
+                director: "Richard Linklater",
+                cast: [
+                    { name: "Ethan Hawke", role: "Jesse" },
+                    { name: "Julie Delpy", role: "Celine" }
+                ],
+                youtubeEmbed: "https://www.youtube.com/embed/zSWdZVtXT7E",
+                popularity: 87
+            },
+            {
+                id: 8,
+                title: "Cosmic Odyssey",
+                year: 2024,
+                rating: 8.9,
+                duration: "2h 35m",
+                quality: "4K UHD",
+                genres: ["Animation", "Sci-Fi", "Adventure"],
+                poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80",
+                banner: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80",
+                synopsis: "A breathtaking animated journey following a young astronaut bot charting unknown star systems at the edge of the galaxy.",
+                fullDescription: "Visually groundbreaking animated feature pushing the boundaries of CGI art. Follow AXIOM-7 as it navigates black holes, sentient nebula clouds, and cosmic wonders.",
+                director: "Pixar Animation Team",
+                cast: [
+                    { name: "Wall-E Voice", role: "AXIOM" },
+                    { name: "Eva Voice", role: "EVE" }
+                ],
+                youtubeEmbed: "https://www.youtube.com/embed/1Fg5iWmQjwk",
+                popularity: 95
+            }
+        ];
+
+        // Unique Available Genres
+        const genresList = ["All", "Action", "Comedy", "Horror", "Sci-Fi", "Drama", "Romance", "Animation", "Thriller"];
+
+        // Application State
+        let currentGenre = "All";
+        let searchQuery = "";
+        let currentSort = "popularity";
+        let showWatchlistOnly = false;
+        let watchlist = JSON.parse(localStorage.getItem('cinestream_watchlist')) || [1, 3]; // Default saved IDs
+        let heroIndex = 0;
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('footerYear').textContent = new Date().getFullYear();
+            renderGenrePills();
+            renderHero();
+            renderMovies();
+            updateWatchlistBadges();
+
+            // Setup auto-rotating Hero Banner every 8 seconds
+            setInterval(() => {
+                if (!document.getElementById('movieModal').classList.contains('flex')) {
+                    heroIndex = (heroIndex + 1) % 3; // Cycle top 3 movies
+                    renderHero();
+                }
+            }, 8000);
+        });
+
+        function saveWatchlist() {
+            localStorage.setItem('cinestream_watchlist', JSON.stringify(watchlist));
+            updateWatchlistBadges();
+            if (showWatchlistOnly) renderMovies();
+        }
+
+        function toggleWatchlist(id) {
+            if (watchlist.includes(id)) {
+                watchlist = watchlist.filter(item => item !== id);
+            } else {
+                watchlist.push(id);
+            }
+            saveWatchlist();
+            renderMovies();
+            
+            // Sync active Hero watch state if currently displayed
+            if (moviesDatabase[heroIndex].id === id) {
+                updateHeroWatchlistBtn();
+            }
+        }
+
+        function updateWatchlistBadges() {
+            const count = watchlist.length;
+            document.getElementById('navWatchlistBadge').textContent = count;
+            document.getElementById('watchlistCountIcon').textContent = count;
+            document.getElementById('mobileWatchlistBadge').textContent = count;
+        }
+
+        function renderHero() {
+            const movie = moviesDatabase[heroIndex];
+            if (!movie) return;
+
+            document.getElementById('heroBg').style.backgroundImage = `url('${movie.banner}')`;
+            document.getElementById('heroQuality').textContent = movie.quality;
+            document.getElementById('heroRating').querySelector('span').textContent = movie.rating;
+            document.getElementById('heroTitle').textContent = movie.title;
+            document.getElementById('heroYear').textContent = movie.year;
+            document.getElementById('heroDuration').textContent = movie.duration;
+            document.getElementById('heroGenres').textContent = movie.genres.join(', ');
+            document.getElementById('heroSynopsis').textContent = movie.synopsis;
+
+            updateHeroWatchlistBtn();
+
+            // Render carousel indicator dots
+            const dotsContainer = document.getElementById('heroCarouselDots');
+            dotsContainer.innerHTML = moviesDatabase.slice(0, 3).map((m, idx) => `
+                <button onclick="setHeroIndex(${idx})" aria-label="Hero slide ${idx + 1}" class="w-3 h-3 rounded-full transition-all ${idx === heroIndex ? 'bg-brand-500 w-8' : 'bg-slate-600 hover:bg-slate-400'}"></button>
+            `).join('');
+        }
+
+        function setHeroIndex(idx) {
+            heroIndex = idx;
+            renderHero();
+        }
+
+        function updateHeroWatchlistBtn() {
+            const movie = moviesDatabase[heroIndex];
+            const isSaved = watchlist.includes(movie.id);
+            const icon = document.getElementById('heroWatchlistIcon');
+            const text = document.getElementById('heroWatchlistText');
+
+            if (isSaved) {
+                icon.className = "fas fa-bookmark text-brand-500";
+                text.textContent = "Saved in Watchlist";
+            } else {
+                icon.className = "far fa-bookmark";
+                text.textContent = "Add to Watchlist";
+            }
+        }
+
+        function toggleHeroWatchlist() {
+            const movie = moviesDatabase[heroIndex];
+            toggleWatchlist(movie.id);
+        }
+
+        function openHeroDetails() {
+            openModal(moviesDatabase[heroIndex].id);
+        }
+
+        function openTrailerFromHero() {
+            openModal(moviesDatabase[heroIndex].id, true);
+        }
+
+        function renderGenrePills() {
+            const container = document.getElementById('genreContainer');
+            container.innerHTML = genresList.map(genre => `
+                <button onclick="filterGenre('${genre}')" class="px-5 py-2 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap transition-all ${currentGenre === genre && !showWatchlistOnly ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/30' : 'bg-darkcard border border-slate-700/60 text-slate-300 hover:bg-slate-800'}">
+                    ${genre}
+                </button>
+            `).join('');
+        }
+
+        function filterGenre(genre) {
+            currentGenre = genre;
+            showWatchlistOnly = false;
+            document.getElementById('sectionHeading').textContent = genre === 'All' ? 'Trending Movies' : `${genre} Movies`;
+            document.getElementById('sectionSubheading').textContent = `Showing popular titles in ${genre}`;
+            renderGenrePills();
+            renderMovies();
+        }
+
+        function toggleWatchlistOnly(flag) {
+            showWatchlistOnly = flag;
+            if (flag) {
+                document.getElementById('sectionHeading').textContent = 'My Saved Watchlist';
+                document.getElementById('sectionSubheading').textContent = 'Your personal bookmarked movie collection';
+                // Reset pills styling
+                document.querySelectorAll('#genreContainer button').forEach(b => {
+                    b.className = "px-5 py-2 rounded-xl text-xs sm:text-sm font-extrabold whitespace-nowrap bg-darkcard border border-slate-700/60 text-slate-300 hover:bg-slate-800";
+                });
+            }
+            renderMovies();
+        }
+
+        function handleSearch() {
+            searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+            document.getElementById('clearSearchBtn').classList.toggle('hidden', searchQuery === '');
+            renderMovies();
+        }
+
+        function handleMobileSearch() {
+            searchQuery = document.getElementById('mobileSearchInput').value.trim().toLowerCase();
+            renderMovies();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('mobileSearchInput').value = '';
+            searchQuery = '';
+            document.getElementById('clearSearchBtn').classList.add('hidden');
+            renderMovies();
+        }
+
+        function resetFilters() {
+            currentGenre = 'All';
+            searchQuery = '';
+            showWatchlistOnly = false;
+            document.getElementById('searchInput').value = '';
+            document.getElementById('sectionHeading').textContent = 'Trending Movies';
+            document.getElementById('sectionSubheading').textContent = 'Explore top rated movies, trailers, and reviews';
+            renderGenrePills();
+            renderMovies();
+        }
+
+        function handleSort() {
+            currentSort = document.getElementById('sortSelect').value;
+            renderMovies();
+        }
+
+        function renderMovies() {
+            let filtered = moviesDatabase.filter(movie => {
+                // Genre Filter
+                const matchesGenre = currentGenre === 'All' || movie.genres.includes(currentGenre);
+                // Search Query Filter
+                const matchesSearch = searchQuery === '' || 
+                    movie.title.toLowerCase().includes(searchQuery) ||
+                    movie.genres.some(g => g.toLowerCase().includes(searchQuery)) ||
+                    movie.director.toLowerCase().includes(searchQuery);
+                // Watchlist Filter
+                const matchesWatchlist = !showWatchlistOnly || watchlist.includes(movie.id);
+
+                return matchesGenre && matchesSearch && matchesWatchlist;
+            });
+
+            // Sorting Logic
+            filtered.sort((a, b) => {
+                if (currentSort === 'rating') return b.rating - a.rating;
+                if (currentSort === 'newest') return b.year - a.year;
+                if (currentSort === 'title') return a.title.localeCompare(b.title);
+                return b.popularity - a.popularity; // default popularity
+            });
+
+            const grid = document.getElementById('movieGrid');
+            const noResults = document.getElementById('noResultsState');
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            noResults.classList.add('hidden');
+            grid.innerHTML = filtered.map(movie => {
+                const isSaved = watchlist.includes(movie.id);
+                return `
+                    <div class="group relative rounded-2xl bg-darkcard border border-slate-800 overflow-hidden shadow-lg hover:shadow-2xl hover:border-slate-700 transition-all duration-300 flex flex-col transform hover:-translate-y-1.5">
+                        
+                        <!-- Poster Container -->
+                        <div class="relative overflow-hidden aspect-[2/3] bg-slate-900 cursor-pointer" onclick="openModal(${movie.id})">
+                            <img src="${movie.poster}" alt="${movie.title} Poster" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            
+                            <!-- Rating Badge Overlay -->
+                            <div class="absolute top-3 left-3 px-2.5 py-1 rounded-lg glass-panel text-amber-400 font-extrabold text-xs flex items-center space-x-1">
+                                <i class="fas fa-star text-[10px]"></i>
+                                <span>${movie.rating}</span>
+                            </div>
+
+                            <!-- Quality Badge -->
+                            <div class="absolute top-3 right-3 px-2 py-0.5 rounded bg-black/60 text-slate-300 text-[10px] font-bold uppercase">
+                                ${movie.quality}
+                            </div>
+
+                            <!-- Quick Play / Bookmark Overlay -->
+                            <div class="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center space-y-3 p-4 text-center">
+                                <button class="w-12 h-12 rounded-full bg-brand-500 text-white flex items-center justify-center text-lg shadow-xl shadow-brand-500/40 hover:scale-110 transition-transform">
+                                    <i class="fas fa-play ml-0.5"></i>
+                                </button>
+                                <span class="text-xs font-bold text-slate-200">Quick View</span>
+                            </div>
+                        </div>
+
+                        <!-- Card Meta Info -->
+                        <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+                            <div>
+                                <div class="flex items-center justify-between text-xs text-slate-400 font-semibold mb-1">
+                                    <span>${movie.year}</span>
+                                    <span>${movie.duration}</span>
+                                </div>
+                                <h3 onclick="openModal(${movie.id})" class="font-bold text-base text-slate-100 group-hover:text-brand-500 transition-colors line-clamp-1 cursor-pointer">
+                                    ${movie.title}
+                                </h3>
+                                <p class="text-xs text-cyanAccent font-medium mt-1">
+                                    ${movie.genres.slice(0, 2).join(', ')}
+                                </p>
+                            </div>
+
+                            <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between">
+                                <button onclick="openModal(${movie.id})" class="text-xs font-bold text-slate-300 hover:text-white flex items-center space-x-1">
+                                    <span>Details</span>
+                                    <i class="fas fa-chevron-right text-[10px]"></i>
+                                </button>
+                                
+                                <button onclick="toggleWatchlist(${movie.id})" aria-label="Toggle Watchlist ${movie.title}" class="p-1.5 rounded-lg text-slate-400 hover:text-brand-500 transition-colors">
+                                    <i class="${isSaved ? 'fas fa-bookmark text-brand-500' : 'far fa-bookmark'} text-base"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openModal(id, autoPlayTrailer = false) {
+            const movie = moviesDatabase.find(m => m.id === id);
+            if (!movie) return;
+
+            const isSaved = watchlist.includes(movie.id);
+            const container = document.getElementById('modalContainer');
+
+            // Similar Movies Recommendation Logic
+            const similarMovies = moviesDatabase
+                .filter(m => m.id !== movie.id && m.genres.some(g => movie.genres.includes(g)))
+                .slice(0, 3);
+
+            container.innerHTML = `
+                <!-- Modal Banner Background -->
+                <div class="relative h-64 sm:h-80 bg-slate-900 overflow-hidden">
+                    <img src="${movie.banner}" alt="${movie.title} Banner" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-darkcard via-darkcard/50 to-transparent"></div>
+                    
+                    <div class="absolute bottom-6 left-6 right-6 flex items-end justify-between">
+                        <div>
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="px-2.5 py-0.5 rounded bg-brand-500 text-white font-extrabold text-xs uppercase">${movie.quality}</span>
+                                <span class="text-xs font-bold text-slate-300">${movie.year} • ${movie.duration}</span>
+                            </div>
+                            <h2 class="text-2xl sm:text-4xl font-black text-white">${movie.title}</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6 sm:p-8 space-y-8">
+                    <!-- Main Specs & Quick Actions -->
+                    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-6">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center text-amber-400 font-black text-2xl space-x-1">
+                                <i class="fas fa-star text-xl"></i>
+                                <span>${movie.rating}</span>
+                                <span class="text-xs font-medium text-slate-400">/ 10</span>
+                            </div>
+                            <div class="h-8 w-px bg-slate-800"></div>
+                            <div>
+                                <span class="text-xs text-slate-400 block">Directed by</span>
+                                <span class="text-sm font-bold text-slate-200">${movie.director}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <button onclick="toggleWatchlist(${movie.id}); openModal(${movie.id})" class="px-5 py-2.5 rounded-xl ${isSaved ? 'bg-brand-500/20 text-brand-500 border border-brand-500/40' : 'bg-slate-800 text-slate-200 hover:bg-slate-700'} font-bold text-sm transition-colors flex items-center space-x-2">
+                                <i class="${isSaved ? 'fas fa-bookmark' : 'far fa-bookmark'}"></i>
+                                <span>${isSaved ? 'Saved in Watchlist' : 'Add to Watchlist'}</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Trailer Player Video Iframe -->
+                    <div class="space-y-3">
+                        <h3 class="text-lg font-bold text-slate-200 flex items-center space-x-2">
+                            <i class="fas fa-film text-brand-500"></i>
+                            <span>Official Movie Trailer</span>
+                        </h3>
+                        <div class="relative overflow-hidden rounded-2xl aspect-video bg-black border border-slate-800 shadow-inner">
+                            <iframe src="${movie.youtubeEmbed}?autoplay=${autoPlayTrailer ? 1 : 0}" title="${movie.title} Trailer" class="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                    </div>
+
+                    <!-- Description & Plot -->
+                    <div class="space-y-3">
+                        <h3 class="text-lg font-bold text-slate-200">Storyline</h3>
+                        <p class="text-sm text-slate-300 leading-relaxed">${movie.fullDescription}</p>
+                    </div>
+
+                    <!-- Cast & Crew Pills -->
+                    <div class="space-y-3">
+                        <h3 class="text-lg font-bold text-slate-200">Main Cast</h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            ${movie.cast.map(c => `
+                                <div class="p-3 rounded-xl bg-slate-900 border border-slate-800 flex flex-col justify-center">
+                                    <span class="font-bold text-sm text-slate-200 line-clamp-1">${c.name}</span>
+                                    <span class="text-xs text-slate-400 line-clamp-1">${c.role}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Interactive User Rating Star Widget -->
+                    <div class="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3 text-center">
+                        <h4 class="font-bold text-sm text-slate-200">Rate This Movie</h4>
+                        <div class="flex justify-center space-x-2 text-2xl text-slate-600 cursor-pointer" id="modalStarRating">
+                            <i class="far fa-star hover:text-amber-400 transition-colors" onclick="submitRating(1)"></i>
+                            <i class="far fa-star hover:text-amber-400 transition-colors" onclick="submitRating(2)"></i>
+                            <i class="far fa-star hover:text-amber-400 transition-colors" onclick="submitRating(3)"></i>
+                            <i class="far fa-star hover:text-amber-400 transition-colors" onclick="submitRating(4)"></i>
+                            <i class="far fa-star hover:text-amber-400 transition-colors" onclick="submitRating(5)"></i>
+                        </div>
+                        <p id="ratingFeedback" class="text-xs text-slate-400">Click a star to leave your review</p>
+                    </div>
+
+                    <!-- Recommended Movies -->
+                    ${similarMovies.length > 0 ? `
+                        <div class="space-y-4 pt-4 border-t border-slate-800">
+                            <h3 class="text-lg font-bold text-slate-200">You Might Also Like</h3>
+                            <div class="grid grid-cols-3 gap-4">
+                                ${similarMovies.map(sm => `
+                                    <div onclick="openModal(${sm.id})" class="group cursor-pointer rounded-xl bg-slate-900 overflow-hidden border border-slate-800 hover:border-slate-700 transition-all">
+                                        <div class="aspect-[2/3] overflow-hidden">
+                                            <img src="${sm.poster}" alt="${sm.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                        </div>
+                                        <div class="p-2 text-center">
+                                            <span class="text-xs font-bold text-slate-200 line-clamp-1 group-hover:text-brand-500">${sm.title}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            document.getElementById('movieModal').classList.remove('hidden');
+            document.getElementById('movieModal').classList.add('flex');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('movieModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+            
+            // Stop trailer iframe playback on close
+            document.getElementById('modalContainer').innerHTML = '';
+        }
+
+        function submitRating(stars) {
+            const feedback = document.getElementById('ratingFeedback');
+            const starContainer = document.getElementById('modalStarRating');
+            starContainer.innerHTML = Array.from({length: 5}, (_, i) => `
+                <i class="fas fa-star text-amber-400"></i>
+            `).slice(0, stars).join('') + Array.from({length: 5 - stars}, () => `
+                <i class="far fa-star text-slate-600"></i>
+            `).join('');
+
+            feedback.textContent = `Thank you! You rated this movie ${stars} out of 5 stars.`;
+            feedback.className = "text-xs font-bold text-emerald-400";
+        }
+
+        function closeMobileDrawer() {
+            document.getElementById('mobileDrawer').classList.add('hidden');
+        }
+
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            document.getElementById('mobileDrawer').classList.toggle('hidden');
+        });
+
+        // Close Modal on backdrop click
+        document.getElementById('movieModal').addEventListener('click', (e) => {
+            if (e.target.id === 'movieModal') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
