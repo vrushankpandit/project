@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IronPulse - Gym Management System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(244,63,94,0.3); border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(244,63,94,0.6); }
+        @media print {
+            body * { visibility: hidden; }
+            #printable-invoice, #printable-invoice * { visibility: visible; }
+            #printable-invoice { position: absolute; left: 0; top: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen transition-colors duration-200">
+
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <nav class="sticky top-0 z-40 backdrop-blur-md bg-slate-950/80 border-b border-slate-800 px-4 lg:px-8 py-3.5 flex items-center justify-between">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="showTab('landing')">
+            <div class="p-2.5 bg-brand-600 rounded-xl text-white shadow-lg shadow-brand-600/30">
+                <i data-lucide="dumbbell" class="w-6 h-6"></i>
+            </div>
+            <span class="text-xl font-extrabold tracking-wider bg-gradient-to-r from-brand-500 via-orange-400 to-amber-300 bg-clip-text text-transparent">
+                IRON<span class="text-slate-900 dark:text-white">PULSE</span>
+            </span>
+        </div>
+
+        <div id="nav-links" class="hidden md:flex items-center space-x-6">
+            <button onclick="showTab('landing')" class="nav-btn text-sm font-semibold transition-colors text-brand-500">Home</button>
+            <button onclick="scrollToSection('services')" class="nav-btn text-sm font-semibold transition-colors text-slate-400 hover:text-white">Services</button>
+            <button onclick="scrollToSection('plans')" class="nav-btn text-sm font-semibold transition-colors text-slate-400 hover:text-white">Plans</button>
+            <button onclick="scrollToSection('trainers')" class="nav-btn text-sm font-semibold transition-colors text-slate-400 hover:text-white">Trainers</button>
+            <button onclick="scrollToSection('faq')" class="nav-btn text-sm font-semibold transition-colors text-slate-400 hover:text-white">FAQ</button>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <button id="theme-toggle-btn" onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition">
+                <i data-lucide="sun" class="w-5 h-5 dark:block hidden"></i>
+                <i data-lucide="moon" class="w-5 h-5 dark:hidden block"></i>
+            </button>
+
+            <div id="auth-nav-buttons">
+                <!-- Dynamically populated JS -->
+            </div>
+        </div>
+    </nav>
+
+    <div id="view-landing" class="view-panel">
+        <!-- Hero Section -->
+        <section class="relative overflow-hidden py-24 lg:py-32 bg-slate-950">
+            <div class="absolute inset-0 z-0 opacity-20 bg-[radial-gradient(#f43f5e_1px,transparent_1px)] [background-size:16px_16px]"></div>
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-950/80 border border-brand-800/50 text-brand-400 text-xs font-bold tracking-widest uppercase mb-6">
+                    <i data-lucide="flame" class="w-4 h-4 text-brand-500 animate-pulse"></i> Next-Gen Fitness Facility System
+                </span>
+                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white mb-6 leading-tight">
+                    TRANSFORM YOUR <br class="hidden sm:inline" />
+                    <span class="bg-gradient-to-r from-brand-500 via-orange-400 to-amber-400 bg-clip-text text-transparent">
+                        FITNESS MANAGEMENT
+                    </span>
+                </h1>
+                <p class="max-w-2xl mx-auto text-base sm:text-xl text-slate-400 mb-10 leading-relaxed">
+                    Automate member management, membership billing, trainer assignments, and AI-powered custom workout regimens in one unified operational cockpit.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <button onclick="openAuthModal('login')" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-base shadow-xl shadow-brand-600/30 flex items-center justify-center gap-2 transition transform hover:-translate-y-0.5">
+                        Launch Management Console <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                    </button>
+                    <button onclick="scrollToSection('plans')" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-200 font-semibold text-base transition">
+                        View Membership Tiers
+                    </button>
+                </div>
+
+                <!-- Metrics Counter Bar -->
+                <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto p-6 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-sm">
+                    <div>
+                        <h3 id="landing-stat-members" class="text-3xl font-extrabold text-white">0</h3>
+                        <p class="text-xs text-slate-400 uppercase tracking-wider mt-1">Active Members</p>
+                    </div>
+                    <div>
+                        <h3 id="landing-stat-trainers" class="text-3xl font-extrabold text-brand-500">0</h3>
+                        <p class="text-xs text-slate-400 uppercase tracking-wider mt-1">Master Coaches</p>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-extrabold text-white">99.8%</h3>
+                        <p class="text-xs text-slate-400 uppercase tracking-wider mt-1">Check-in Accuracy</p>
+                    </div>
+                    <div>
+                        <h3 class="text-3xl font-extrabold text-orange-400">4.9 ★</h3>
+                        <p class="text-xs text-slate-400 uppercase tracking-wider mt-1">User Satisfaction</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Grid -->
+        <section id="services" class="py-20 bg-slate-900 border-t border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Core Administrative Features</h2>
+                    <p class="text-slate-400 mt-2">Engineered specifically for boutique fitness clubs and high-traffic gyms.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="p-8 rounded-2xl bg-slate-950 border border-slate-800 hover:border-brand-600/50 transition group">
+                        <div class="p-3 bg-brand-600/10 text-brand-500 rounded-xl w-fit mb-6 group-hover:bg-brand-600 group-hover:text-white transition">
+                            <i data-lucide="users" class="w-7 h-7"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Member Lifecycle</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">Complete digital profiles, subscription statuses, expiration alerts, and payment history.</p>
+                    </div>
+                    <div class="p-8 rounded-2xl bg-slate-950 border border-slate-800 hover:border-brand-600/50 transition group">
+                        <div class="p-3 bg-amber-600/10 text-amber-400 rounded-xl w-fit mb-6 group-hover:bg-amber-500 group-hover:text-white transition">
+                            <i data-lucide="sparkles" class="w-7 h-7"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">AI Workout Builder</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">Instant tailored split routines and macro meal plans calculated automatically by target goal.</p>
+                    </div>
+                    <div class="p-8 rounded-2xl bg-slate-950 border border-slate-800 hover:border-brand-600/50 transition group">
+                        <div class="p-3 bg-emerald-600/10 text-emerald-400 rounded-xl w-fit mb-6 group-hover:bg-emerald-500 group-hover:text-white transition">
+                            <i data-lucide="user-check" class="w-7 h-7"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3">Attendance & Logs</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">Timestamped turnstile attendance tracking with quick check-in actions and history search.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Plans Section -->
+        <section id="plans" class="py-20 bg-slate-950 border-t border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Membership Tier Packages</h2>
+                    <p class="text-slate-400 mt-2">Flexible plans created for any fitness level.</p>
+                </div>
+                <div id="landing-plans-container" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Dynamically Loaded via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Trainers Section -->
+        <section id="trainers" class="py-20 bg-slate-900 border-t border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Master Trainers</h2>
+                    <p class="text-slate-400 mt-2">Certified experts guiding our facility floor.</p>
+                </div>
+                <div id="landing-trainers-container" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Dynamically Loaded via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq" class="py-20 bg-slate-950 border-t border-slate-800">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-extrabold text-white">Frequently Asked Questions</h2>
+                </div>
+                <div class="space-y-4">
+                    <div class="border border-slate-800 rounded-xl bg-slate-900 p-4">
+                        <button onclick="toggleAccordion('faq-1')" class="w-full text-left font-semibold text-white flex justify-between items-center">
+                            <span>How does the AI Workout Plan Generator work?</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+                        </button>
+                        <div id="faq-1" class="hidden mt-3 text-sm text-slate-400 border-t border-slate-800/80 pt-3">
+                            The built-in engine computes split routines, target rep ranges, and calorie macronutrient targets using target member goals (Muscle Gain, Fat Loss, Strength).
+                        </div>
+                    </div>
+                    <div class="border border-slate-800 rounded-xl bg-slate-900 p-4">
+                        <button onclick="toggleAccordion('faq-2')" class="w-full text-left font-semibold text-white flex justify-between items-center">
+                            <span>Can I print member payment invoices?</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400"></i>
+                        </button>
+                        <div id="faq-2" class="hidden mt-3 text-sm text-slate-400 border-t border-slate-800/80 pt-3">
+                            Yes! Clicking "View Receipt" opens a receipt modal with an integrated print engine formatted for standard printers.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-12 bg-slate-950 border-t border-slate-900 text-slate-400 text-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="dumbbell" class="w-5 h-5 text-brand-500"></i>
+                    <span class="font-bold text-white tracking-wider">IRONPULSE OS</span>
+                </div>
+                <p>© 2026 IronPulse Systems Inc. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <div id="view-dashboard" class="view-panel hidden flex min-h-[calc(100vh-65px)]">
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 bg-slate-950 border-r border-slate-800 p-4 hidden md:flex flex-col justify-between">
+            <div class="space-y-1">
+                <div class="px-3 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                    Operational Portal
+                </div>
+                <button onclick="switchDashboardTab('overview')" id="db-nav-overview" class="db-tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition bg-brand-600 text-white">
+                    <i data-lucide="activity" class="w-4 h-4"></i>
+                    <span>Overview</span>
+                </button>
+                <button onclick="switchDashboardTab('members')" id="db-nav-members" class="db-tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition text-slate-400 hover:bg-slate-900 hover:text-white">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    <span>Members</span>
+                </button>
+                <button onclick="switchDashboardTab('trainers')" id="db-nav-trainers" class="db-tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition text-slate-400 hover:bg-slate-900 hover:text-white">
+                    <i data-lucide="award" class="w-4 h-4"></i>
+                    <span>Trainers</span>
+                </button>
+                <button onclick="switchDashboardTab('plans')" id="db-nav-plans" class="db-tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition text-slate-400 hover:bg-slate-900 hover:text-white">
+                    <i data-lucide="credit-card" class="w-4 h-4"></i>
+                    <span>Membership Plans</span>
+                </button>
+                <button onclick="switchDashboardTab('attendance')" id="db-nav-attendance" class="db-tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition text-slate-400 hover:bg-slate-900 hover:text-white">
+                    <i data-lucide="user-check" class="w-4 h-4"></i>
+                    <span>Attendance Log</span>
+                </button>
+                <button onclick="switchDashboardTab('workout')" id="db-nav-workout" class="db-tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition text-slate-400 hover:bg-slate-900 hover:text-white">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+                    <span>AI Workout Generator</span>
+                </button>
+                <button onclick="switchDashboardTab('payments')" id="db-nav-payments" class="db-tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition text-slate-400 hover:bg-slate-900 hover:text-white">
+                    <i data-lucide="dollar-sign" class="w-4 h-4"></i>
+                    <span>Payments & Billing</span>
+                </button>
+            </div>
+            <div class="pt-4 border-t border-slate-800">
+                <button onclick="switchDashboardTab('settings')" id="db-nav-settings" class="db-tab-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition text-slate-400 hover:bg-slate-900 hover:text-white">
+                    <i data-lucide="settings" class="w-4 h-4"></i>
+                    <span>Settings</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace View -->
+        <main class="flex-1 p-6 lg:p-8 overflow-y-auto custom-scrollbar">
+            
+            <!-- Dashboard Section: Overview -->
+            <div id="dash-section-overview" class="dash-section space-y-8">
+                <div class="p-6 rounded-2xl bg-gradient-to-r from-brand-950 via-slate-900 to-slate-900 border border-brand-900/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">System Dashboard Overview</h2>
+                        <p class="text-slate-400 text-sm mt-1">Real-time metrics for IronPulse Gym Facility</p>
+                    </div>
+                    <button onclick="openMemberModal()" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-brand-600/30">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Enroll Member
+                    </button>
+                </div>
+
+                <!-- Metrics Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-semibold text-slate-400 uppercase">Total Members</span>
+                            <i data-lucide="users" class="w-5 h-5 text-brand-500"></i>
+                        </div>
+                        <div id="stat-total-members" class="text-3xl font-extrabold text-white">0</div>
+                        <p class="text-xs text-emerald-400 mt-2 flex items-center gap-1">
+                            <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> +14% this month
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-semibold text-slate-400 uppercase">Active Subscriptions</span>
+                            <i data-lucide="credit-card" class="w-5 h-5 text-amber-400"></i>
+                        </div>
+                        <div id="stat-active-members" class="text-3xl font-extrabold text-white">0</div>
+                        <p class="text-xs text-slate-400 mt-2">Active Floor Access</p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-semibold text-slate-400 uppercase">Total Trainers</span>
+                            <i data-lucide="award" class="w-5 h-5 text-blue-400"></i>
+                        </div>
+                        <div id="stat-total-trainers" class="text-3xl font-extrabold text-white">0</div>
+                        <p class="text-xs text-slate-400 mt-2">Certified Coaches</p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-slate-900 border border-slate-800">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-xs font-semibold text-slate-400 uppercase">Today's Check-ins</span>
+                            <i data-lucide="user-check" class="w-5 h-5 text-emerald-400"></i>
+                        </div>
+                        <div id="stat-today-attendance" class="text-3xl font-extrabold text-white">0</div>
+                        <p class="text-xs text-emerald-400 mt-2">Live Floor Check-ins</p>
+                    </div>
+                </div>
+
+                <!-- Preview Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
+                        <h3 class="text-lg font-bold text-white mb-4 flex items-center justify-between">
+                            <span>Today's Live Check-Ins</span>
+                            <button onclick="switchDashboardTab('attendance')" class="text-xs text-brand-400 hover:underline">View All</button>
+                        </h3>
+                        <div id="dash-recent-attendance" class="space-y-3"></div>
+                    </div>
+
+                    <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800">
+                        <h3 class="text-lg font-bold text-white mb-4 flex items-center justify-between">
+                            <span>Recent Members</span>
+                            <button onclick="switchDashboardTab('members')" class="text-xs text-brand-400 hover:underline">Manage All</button>
+                        </h3>
+                        <div id="dash-recent-members" class="space-y-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Section: Members -->
+            <div id="dash-section-members" class="dash-section hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Member Directory</h2>
+                        <p class="text-slate-400 text-xs mt-1">Manage member subscriptions and personal profiles</p>
+                    </div>
+                    <button onclick="openMemberModal()" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-brand-600/30">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Add New Member
+                    </button>
+                </div>
+
+                <!-- Search & Filters -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="relative flex-1">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-500"></i>
+                        <input type="text" id="member-search-input" onkeyup="renderMembersTable()" placeholder="Search members by name, email or phone..." class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm focus:outline-none focus:border-brand-500" />
+                    </div>
+                    <select id="member-status-filter" onchange="renderMembersTable()" class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-semibold">
+                        <option value="All">All Statuses</option>
+                        <option value="Active">Active</option>
+                        <option value="Expired">Expired</option>
+                    </select>
+                </div>
+
+                <!-- Table -->
+                <div class="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-300">
+                            <thead class="bg-slate-950 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+                                <tr>
+                                    <th class="px-6 py-4">Member</th>
+                                    <th class="px-6 py-4">Contact</th>
+                                    <th class="px-6 py-4">Plan</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="members-table-body" class="divide-y divide-slate-800">
+                                <!-- JS Injected -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Section: Trainers -->
+            <div id="dash-section-trainers" class="dash-section hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Fitness Trainers & Coaches</h2>
+                        <p class="text-slate-400 text-xs mt-1">Manage instructional staff and assignments</p>
+                    </div>
+                    <button onclick="openTrainerModal()" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold flex items-center gap-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Add Trainer
+                    </button>
+                </div>
+                <div id="trainers-grid-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- JS Injected -->
+                </div>
+            </div>
+
+            <!-- Dashboard Section: Plans -->
+            <div id="dash-section-plans" class="dash-section hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Membership Package Configuration</h2>
+                        <p class="text-slate-400 text-xs mt-1">Configure pricing tiers, features, and active status</p>
+                    </div>
+                </div>
+                <div id="plans-grid-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- JS Injected -->
+                </div>
+            </div>
+
+            <!-- Dashboard Section: Attendance -->
+            <div id="dash-section-attendance" class="dash-section hidden space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Daily Attendance Log</h2>
+                        <p class="text-slate-400 text-xs mt-1">Log check-ins and review entry history</p>
+                    </div>
+                    <input type="date" id="attendance-date-picker" onchange="renderAttendanceLogs()" class="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-semibold" />
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Quick Check-in Panel -->
+                    <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 lg:col-span-1">
+                        <h3 class="text-sm font-bold text-white mb-4 uppercase tracking-wider">Quick Member Check-In</h3>
+                        <div id="attendance-quick-list" class="space-y-3 max-h-[450px] overflow-y-auto custom-scrollbar pr-1"></div>
+                    </div>
+                    <!-- Attendance Table -->
+                    <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 lg:col-span-2">
+                        <h3 class="text-sm font-bold text-white mb-4 uppercase tracking-wider">Attendance Logs</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-300">
+                                <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                                    <tr>
+                                        <th class="px-4 py-3">Member Name</th>
+                                        <th class="px-4 py-3">Date</th>
+                                        <th class="px-4 py-3">Time</th>
+                                        <th class="px-4 py-3">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendance-table-body" class="divide-y divide-slate-800"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Section: Workout Builder -->
+            <div id="dash-section-workout" class="dash-section hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-6 h-6 text-amber-400"></i>
+                            AI Workout & Nutrition Routine Generator
+                        </h2>
+                        <p class="text-slate-400 text-xs mt-1">Generate customized split routines and dietary macronutrient guides</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider">Generator Parameters</h3>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Target Member</label>
+                            <select id="ai-member-select" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-semibold focus:outline-none focus:border-brand-500"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Fitness Goal</label>
+                            <select id="ai-goal-select" class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-semibold focus:outline-none focus:border-brand-500">
+                                <option value="Muscle Gain & Hypertrophy">Muscle Gain & Hypertrophy</option>
+                                <option value="Fat Loss & Endurance">Fat Loss & Endurance</option>
+                                <option value="Strength Powerlifting">Strength Powerlifting</option>
+                                <option value="General Athletic Fitness">General Athletic Fitness</option>
+                            </select>
+                        </div>
+                        <button onclick="generateAIWorkout()" class="w-full py-3 rounded-xl bg-gradient-to-r from-brand-600 to-amber-600 hover:from-brand-500 hover:to-amber-500 text-white font-bold text-xs shadow-lg flex items-center justify-center gap-2">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i> Generate Workout & Diet
+                        </button>
+                    </div>
+
+                    <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 lg:col-span-2">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Generated Routine Specification</h3>
+                        <div id="ai-output-box" class="p-6 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
+                            Select member & parameters to build custom training routine.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Section: Payments & Billing -->
+            <div id="dash-section-payments" class="dash-section hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">Payments & Billing</h2>
+                        <p class="text-slate-400 text-xs mt-1">Transaction logs and printable payment receipts</p>
+                    </div>
+                </div>
+                <div class="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                            <tr>
+                                <th class="px-6 py-4">Invoice ID</th>
+                                <th class="px-6 py-4">Member Name</th>
+                                <th class="px-6 py-4">Plan</th>
+                                <th class="px-6 py-4">Amount</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payments-table-body" class="divide-y divide-slate-800"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Dashboard Section: Settings -->
+            <div id="dash-section-settings" class="dash-section hidden max-w-2xl space-y-6">
+                <h2 class="text-2xl font-bold text-white">Facility Settings</h2>
+                <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Gym Name</label>
+                        <input type="text" id="setting-gym-name" value="IronPulse Fitness Facility" class="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Support Email</label>
+                        <input type="email" id="setting-gym-email" value="admin@ironpulse.gym" class="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs" />
+                    </div>
+                    <button onclick="saveGymSettings()" class="px-5 py-2.5 rounded-xl bg-brand-600 text-white font-bold text-xs">Save Settings</button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Authentication Modal (Login / Signup) -->
+    <div id="modal-auth" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div class="w-full max-w-md p-8 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl relative">
+            <button onclick="closeModal('modal-auth')" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="text-center mb-8">
+                <div class="p-3 bg-brand-600/10 text-brand-500 rounded-2xl w-fit mx-auto mb-3">
+                    <i data-lucide="shield" class="w-8 h-8"></i>
+                </div>
+                <h2 id="auth-modal-title" class="text-2xl font-bold text-white">Admin Access Sign In</h2>
+            </div>
+            <form onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Email Address</label>
+                    <input type="email" id="auth-email" value="admin@ironpulse.gym" required class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-brand-500" />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wider">Password</label>
+                    <input type="password" id="auth-password" value="password123" required class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-brand-500" />
+                </div>
+                <button type="submit" class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm shadow-lg shadow-brand-600/30 transition">
+                    Authenticate Session
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Member Modal -->
+    <div id="modal-member" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div class="w-full max-w-lg p-6 rounded-2xl bg-slate-900 border border-slate-800 text-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="member-modal-title" class="text-lg font-bold">Enroll New Member</h3>
+                <button onclick="closeModal('modal-member')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="saveMemberForm(event)" class="space-y-4">
+                <input type="hidden" id="member-form-id" />
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Full Name</label>
+                    <input type="text" id="member-form-name" required class="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white" />
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Email</label>
+                        <input type="email" id="member-form-email" required class="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Phone</label>
+                        <input type="text" id="member-form-phone" required class="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white" />
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Gender</label>
+                        <select id="member-form-gender" class="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Age</label>
+                        <input type="number" id="member-form-age" value="25" required class="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white" />
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Plan</label>
+                        <select id="member-form-plan" class="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white">
+                            <option value="Basic Plan">Basic Plan</option>
+                            <option value="Standard Plan">Standard Plan</option>
+                            <option value="Premium VIP Plan">Premium VIP Plan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Status</label>
+                        <select id="member-form-status" class="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white">
+                            <option value="Active">Active</option>
+                            <option value="Expired">Expired</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-2 pt-4">
+                    <button type="button" onclick="closeModal('modal-member')" class="flex-1 py-2 rounded-xl bg-slate-800 text-xs font-semibold">Cancel</button>
+                    <button type="submit" class="flex-1 py-2 rounded-xl bg-brand-600 text-xs font-semibold">Save Member</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Trainer Modal -->
+    <div id="modal-trainer" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div class="w-full max-w-lg p-6 rounded-2xl bg-slate-900 border border-slate-800 text-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="trainer-modal-title" class="text-lg font-bold">Add Fitness Trainer</h3>
+                <button onclick="closeModal('modal-trainer')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form onsubmit="saveTrainerForm(event)" class="space-y-4">
+                <input type="hidden" id="trainer-form-id" />
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Trainer Name</label>
+                    <input type="text" id="trainer-form-name" required class="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white" />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Specialization</label>
+                    <input type="text" id="trainer-form-spec" required class="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white" />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Experience</label>
+                    <input type="text" id="trainer-form-exp" required placeholder="e.g. 5 Years" class="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white" />
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Contact Email</label>
+                    <input type="email" id="trainer-form-email" required class="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white" />
+                </div>
+                <div class="flex gap-2 pt-4">
+                    <button type="button" onclick="closeModal('modal-trainer')" class="flex-1 py-2 rounded-xl bg-slate-800 text-xs font-semibold">Cancel</button>
+                    <button type="submit" class="flex-1 py-2 rounded-xl bg-brand-600 text-xs font-semibold">Save Trainer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Invoice Modal -->
+    <div id="modal-invoice" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div id="printable-invoice" class="w-full max-w-md p-6 rounded-2xl bg-white text-slate-900 shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-4 mb-4">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="dumbbell" class="w-5 h-5 text-brand-600"></i>
+                    <span class="font-extrabold text-sm">IRONPULSE FITNESS</span>
+                </div>
+                <span id="inv-id" class="text-xs font-mono font-bold"></span>
+            </div>
+            <div class="space-y-3 text-xs mb-6">
+                <div class="flex justify-between"><span class="text-slate-500">Member:</span><span id="inv-member" class="font-bold"></span></div>
+                <div class="flex justify-between"><span class="text-slate-500">Plan Purchased:</span><span id="inv-plan" class="font-bold"></span></div>
+                <div class="flex justify-between"><span class="text-slate-500">Payment Date:</span><span id="inv-date"></span></div>
+                <div class="flex justify-between border-t pt-2"><span class="font-bold">Total Paid:</span><span id="inv-amount" class="font-bold text-brand-600 text-sm"></span></div>
+            </div>
+            <div class="flex gap-2 print:hidden">
+                <button onclick="closeModal('modal-invoice')" class="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs">Close</button>
+                <button onclick="window.print()" class="flex-1 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs flex items-center justify-center gap-1">
+                    <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print Receipt
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Default Mock Data Structures
+        const INITIAL_MEMBERS = [
+            { id: 'mem-1', fullName: 'Marcus Vance', email: 'marcus.v@example.com', phone: '+1 (555) 382-9901', gender: 'Male', age: 28, plan: 'Premium VIP Plan', joiningDate: '2024-01-15', status: 'Active', photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200' },
+            { id: 'mem-2', fullName: 'Sophia Martinez', email: 'sophia.m@example.com', phone: '+1 (555) 492-1120', gender: 'Female', age: 24, plan: 'Standard Plan', joiningDate: '2024-02-01', status: 'Active', photoUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=200' },
+            { id: 'mem-3', fullName: 'David Miller', email: 'david.m@example.com', phone: '+1 (555) 201-8833', gender: 'Male', age: 35, plan: 'Basic Plan', joiningDate: '2023-11-10', status: 'Expired', photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200' }
+        ];
+
+        const INITIAL_TRAINERS = [
+            { id: 'trn-1', name: 'Alex Rivera', specialization: 'Bodybuilding & Powerlifting', experience: '8 Years', contact: 'alex.r@ironpulse.gym', photoUrl: 'https://images.unsplash.com/photo-1567013127542-490d757e51fc?auto=format&fit=crop&q=80&w=300' },
+            { id: 'trn-2', name: 'Elena Rostova', specialization: 'Yoga & Functional Pilates', experience: '6 Years', contact: 'elena.r@ironpulse.gym', photoUrl: 'https://images.unsplash.com/photo-1548690312-e3b507d8c110?auto=format&fit=crop&q=80&w=300' }
+        ];
+
+        const INITIAL_PLANS = [
+            { id: 'plan-1', name: 'Basic Plan', duration: '1 Month', price: 39, active: true, features: ['Gym Floor Access', 'Locker Room', '1 Fitness Assessment'] },
+            { id: 'plan-2', name: 'Standard Plan', duration: '3 Months', price: 99, active: true, features: ['Full Gym & Cardio Access', 'All Group Classes', 'Sauna Access'] },
+            { id: 'plan-3', name: 'Premium VIP Plan', duration: '12 Months', price: 349, active: true, features: ['24/7 VIP Access', 'Personal Trainer (2x/mo)', 'Free Daily Shake'] }
+        ];
+
+        const INITIAL_PAYMENTS = [
+            { id: 'INV-901', memberName: 'Marcus Vance', plan: 'Premium VIP Plan', amount: 349, date: '2024-01-15', status: 'Paid' },
+            { id: 'INV-902', memberName: 'Sophia Martinez', plan: 'Standard Plan', amount: 99, date: '2024-02-01', status: 'Paid' }
+        ];
+
+        const INITIAL_ATTENDANCE = [
+            { id: 'att-1', memberId: 'mem-1', memberName: 'Marcus Vance', date: new Date().toISOString().split('T')[0], time: '07:30 AM', status: 'Present' }
+        ];
+
+        // Persistent LocalStorage State Handlers
+        function loadState(key, fallback) {
+            const data = localStorage.getItem('ironpulse_' + key);
+            return data ? JSON.parse(data) : fallback;
+        }
+        function saveState(key, data) {
+            localStorage.setItem('ironpulse_' + key, JSON.stringify(data));
+        }
+
+        let state = {
+            authenticated: loadState('authenticated', false),
+            members: loadState('members', INITIAL_MEMBERS),
+            trainers: loadState('trainers', INITIAL_TRAINERS),
+            plans: loadState('plans', INITIAL_PLANS),
+            payments: loadState('payments', INITIAL_PAYMENTS),
+            attendance: loadState('attendance', INITIAL_ATTENDANCE)
+        };
+
+        window.onload = function() {
+            document.getElementById('attendance-date-picker').value = new Date().toISOString().split('T')[0];
+            updateAuthUI();
+            renderLandingContent();
+            renderDashboard();
+            lucide.createIcons();
+        };
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `px-4 py-3 rounded-xl shadow-xl border text-xs font-semibold flex items-center gap-2 transition-all transform duration-300 translate-y-2 bg-slate-900 text-white ${type === 'error' ? 'border-red-500' : 'border-emerald-500'}`;
+            toast.innerHTML = `<i data-lucide="${type === 'error' ? 'alert-circle' : 'check-circle'}" class="w-4 h-4 ${type === 'error' ? 'text-red-400' : 'text-emerald-400'}"></i> ${message}`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => { toast.remove(); }, 3000);
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            showToast('Theme updated');
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.view-panel').forEach(el => el.classList.add('hidden'));
+            if (tabName === 'dashboard' && !state.authenticated) {
+                openAuthModal();
+                return;
+            }
+            document.getElementById(`view-${tabName}`).classList.remove('hidden');
+            if (tabName === 'dashboard') renderDashboard();
+        }
+
+        function switchDashboardTab(secName) {
+            document.querySelectorAll('.dash-section').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.db-tab-btn').forEach(el => {
+                el.classList.remove('bg-brand-600', 'text-white');
+                el.classList.add('text-slate-400');
+            });
+
+            document.getElementById(`dash-section-${secName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`db-nav-${secName}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-brand-600', 'text-white');
+                activeBtn.classList.remove('text-slate-400');
+            }
+
+            if (secName === 'members') renderMembersTable();
+            if (secName === 'trainers') renderTrainersGrid();
+            if (secName === 'plans') renderPlansGrid();
+            if (secName === 'attendance') renderAttendanceLogs();
+            if (secName === 'workout') populateAIMemberDropdown();
+            if (secName === 'payments') renderPaymentsTable();
+        }
+
+        function scrollToSection(id) {
+            showTab('landing');
+            setTimeout(() => {
+                const el = document.getElementById(id);
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+
+        function toggleAccordion(id) {
+            document.getElementById(id).classList.toggle('hidden');
+        }
+
+        function updateAuthUI() {
+            const btnContainer = document.getElementById('auth-nav-buttons');
+            if (state.authenticated) {
+                btnContainer.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <button onclick="showTab('dashboard')" class="px-3.5 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs font-semibold text-slate-200 hover:bg-slate-700 transition">
+                            Admin Portal
+                        </button>
+                        <button onclick="logout()" class="p-2 text-slate-400 hover:text-red-400 rounded-xl hover:bg-slate-900 transition" title="Logout">
+                            <i data-lucide="log-out" class="w-5 h-5"></i>
+                        </button>
+                    </div>`;
+            } else {
+                btnContainer.innerHTML = `
+                    <button onclick="openAuthModal()" class="px-5 py-2.5 rounded-xl bg-brand-600 text-white font-semibold text-sm shadow-lg shadow-brand-600/30 hover:bg-brand-500 transition">
+                        Portal Login
+                    </button>`;
+            }
+            lucide.createIcons();
+        }
+
+        function openAuthModal() {
+            document.getElementById('modal-auth').classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            state.authenticated = true;
+            saveState('authenticated', true);
+            updateAuthUI();
+            closeModal('modal-auth');
+            showToast('Authenticated as Facility Admin');
+            showTab('dashboard');
+        }
+
+        function logout() {
+            state.authenticated = false;
+            saveState('authenticated', false);
+            updateAuthUI();
+            showTab('landing');
+            showToast('Session logged out');
+        }
+
+        function renderLandingContent() {
+            document.getElementById('landing-stat-members').innerText = state.members.length;
+            document.getElementById('landing-stat-trainers').innerText = state.trainers.length;
+
+            const plansContainer = document.getElementById('landing-plans-container');
+            plansContainer.innerHTML = state.plans.map(p => `
+                <div class="p-8 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-white">${p.name}</h3>
+                        <p class="text-slate-400 text-xs mt-1">Duration: ${p.duration}</p>
+                        <div class="my-6">
+                            <span class="text-4xl font-black text-white">$${p.price}</span>
+                        </div>
+                        <ul class="space-y-3 mb-8">
+                            ${p.features.map(f => `<li class="flex items-center text-sm text-slate-300 gap-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> ${f}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <button onclick="openAuthModal()" class="w-full py-3 rounded-xl bg-brand-600 text-white font-bold text-sm hover:bg-brand-500 transition">Select Plan</button>
+                </div>
+            `).join('');
+
+            const trainersContainer = document.getElementById('landing-trainers-container');
+            trainersContainer.innerHTML = state.trainers.map(t => `
+                <div class="p-6 rounded-2xl bg-slate-950 border border-slate-800 flex items-center space-x-4">
+                    <img src="${t.photoUrl}" class="w-16 h-16 rounded-2xl object-cover" />
+                    <div>
+                        <h3 class="font-bold text-white">${t.name}</h3>
+                        <span class="text-xs text-brand-400 font-semibold">${t.specialization}</span>
+                        <p class="text-xs text-slate-500 mt-1">${t.experience} Experience</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderDashboard() {
+            document.getElementById('stat-total-members').innerText = state.members.length;
+            document.getElementById('stat-active-members').innerText = state.members.filter(m => m.status === 'Active').length;
+            document.getElementById('stat-total-trainers').innerText = state.trainers.length;
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayLogs = state.attendance.filter(a => a.date === todayStr);
+            document.getElementById('stat-today-attendance').innerText = todayLogs.length;
+
+            // Recent attendance preview
+            document.getElementById('dash-recent-attendance').innerHTML = todayLogs.length ? todayLogs.slice(0, 3).map(a => `
+                <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex justify-between items-center">
+                    <span class="text-sm font-semibold text-white">${a.memberName}</span>
+                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-400 text-xs border border-emerald-800">${a.time}</span>
+                </div>
+            `).join('') : `<p class="text-xs text-slate-500 py-4 text-center">No check-ins logged today.</p>`;
+
+            // Recent members preview
+            document.getElementById('dash-recent-members').innerHTML = state.members.slice(0, 3).map(m => `
+                <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex justify-between items-center">
+                    <div>
+                        <div class="text-sm font-semibold text-white">${m.fullName}</div>
+                        <div class="text-xs text-slate-500">${m.plan}</div>
+                    </div>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${m.status === 'Active' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-red-950 text-red-400 border border-red-800'}">${m.status}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderMembersTable() {
+            const query = document.getElementById('member-search-input').value.toLowerCase();
+            const statusFilter = document.getElementById('member-status-filter').value;
+            const filtered = state.members.filter(m => {
+                const matchesQuery = m.fullName.toLowerCase().includes(query) || m.email.toLowerCase().includes(query);
+                const matchesStatus = statusFilter === 'All' || m.status === statusFilter;
+                return matchesQuery && matchesStatus;
+            });
+
+            document.getElementById('members-table-body').innerHTML = filtered.map(m => `
+                <tr class="hover:bg-slate-800/40">
+                    <td class="px-6 py-4 flex items-center space-x-3">
+                        <img src="${m.photoUrl}" class="w-9 h-9 rounded-full object-cover" />
+                        <div>
+                            <div class="font-bold text-white">${m.fullName}</div>
+                            <div class="text-xs text-slate-500">${m.gender}, ${m.age} yrs</div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-xs text-slate-300">${m.email}</div>
+                        <div class="text-xs text-slate-500">${m.phone}</div>
+                    </td>
+                    <td class="px-6 py-4 font-semibold text-slate-200">${m.plan}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${m.status === 'Active' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-red-950 text-red-400 border border-red-800'}">${m.status}</span>
+                    </td>
+                    <td class="px-6 py-4 text-right space-x-2">
+                        <button onclick="editMember('${m.id}')" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                        <button onclick="deleteMember('${m.id}')" class="p-1.5 rounded-lg bg-red-950/50 hover:bg-red-900 text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function openMemberModal(id = null) {
+            document.getElementById('member-form-id').value = id || '';
+            if (id) {
+                const m = state.members.find(item => item.id === id);
+                document.getElementById('member-modal-title').innerText = 'Edit Member Profile';
+                document.getElementById('member-form-name').value = m.fullName;
+                document.getElementById('member-form-email').value = m.email;
+                document.getElementById('member-form-phone').value = m.phone;
+                document.getElementById('member-form-gender').value = m.gender;
+                document.getElementById('member-form-age').value = m.age;
+                document.getElementById('member-form-plan').value = m.plan;
+                document.getElementById('member-form-status').value = m.status;
+            } else {
+                document.getElementById('member-modal-title').innerText = 'Enroll New Member';
+                document.getElementById('member-form-name').value = '';
+                document.getElementById('member-form-email').value = '';
+                document.getElementById('member-form-phone').value = '';
+                document.getElementById('member-form-gender').value = 'Male';
+                document.getElementById('member-form-age').value = '25';
+                document.getElementById('member-form-plan').value = 'Standard Plan';
+                document.getElementById('member-form-status').value = 'Active';
+            }
+            document.getElementById('modal-member').classList.remove('hidden');
+        }
+
+        function saveMemberForm(e) {
+            e.preventDefault();
+            const id = document.getElementById('member-form-id').value;
+            const memberObj = {
+                id: id || 'mem-' + Date.now(),
+                fullName: document.getElementById('member-form-name').value,
+                email: document.getElementById('member-form-email').value,
+                phone: document.getElementById('member-form-phone').value,
+                gender: document.getElementById('member-form-gender').value,
+                age: document.getElementById('member-form-age').value,
+                plan: document.getElementById('member-form-plan').value,
+                joiningDate: new Date().toISOString().split('T')[0],
+                status: document.getElementById('member-form-status').value,
+                photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'
+            };
+
+            if (id) {
+                state.members = state.members.map(m => m.id === id ? memberObj : m);
+                showToast('Member profile updated');
+            } else {
+                state.members.unshift(memberObj);
+                // Automatically generate initial invoice
+                state.payments.unshift({
+                    id: 'INV-' + Math.floor(100 + Math.random() * 900),
+                    memberName: memberObj.fullName,
+                    plan: memberObj.plan,
+                    amount: memberObj.plan.includes('Premium') ? 349 : memberObj.plan.includes('Standard') ? 99 : 39,
+                    date: memberObj.joiningDate,
+                    status: 'Paid'
+                });
+                saveState('payments', state.payments);
+                showToast('New member enrolled & invoice generated!');
+            }
+            saveState('members', state.members);
+            closeModal('modal-member');
+            renderMembersTable();
+        }
+
+        function editMember(id) { openMemberModal(id); }
+        function deleteMember(id) {
+            state.members = state.members.filter(m => m.id !== id);
+            saveState('members', state.members);
+            renderMembersTable();
+            showToast('Member record removed', 'error');
+        }
+
+        function renderTrainersGrid() {
+            document.getElementById('trainers-grid-container').innerHTML = state.trainers.map(t => `
+                <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center space-x-4 mb-4">
+                            <img src="${t.photoUrl}" class="w-14 h-14 rounded-2xl object-cover" />
+                            <div>
+                                <h3 class="font-bold text-white text-base">${t.name}</h3>
+                                <span class="text-xs text-brand-400 font-semibold">${t.specialization}</span>
+                            </div>
+                        </div>
+                        <div class="space-y-2 text-xs text-slate-400 border-t border-slate-800 pt-3">
+                            <div>Experience: <span class="text-white font-semibold">${t.experience}</span></div>
+                            <div>Email: <span class="text-white">${t.contact}</span></div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 pt-4 border-t border-slate-800 mt-4">
+                        <button onclick="editTrainer('${t.id}')" class="flex-1 py-2 rounded-xl bg-slate-800 text-xs font-semibold hover:bg-slate-700">Edit</button>
+                        <button onclick="deleteTrainer('${t.id}')" class="py-2 px-3 rounded-xl bg-red-950/50 text-red-400 text-xs font-semibold hover:bg-red-900">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openTrainerModal(id = null) {
+            document.getElementById('trainer-form-id').value = id || '';
+            if (id) {
+                const t = state.trainers.find(item => item.id === id);
+                document.getElementById('trainer-modal-title').innerText = 'Edit Trainer';
+                document.getElementById('trainer-form-name').value = t.name;
+                document.getElementById('trainer-form-spec').value = t.specialization;
+                document.getElementById('trainer-form-exp').value = t.experience;
+                document.getElementById('trainer-form-email').value = t.contact;
+            } else {
+                document.getElementById('trainer-modal-title').innerText = 'Add Trainer';
+                document.getElementById('trainer-form-name').value = '';
+                document.getElementById('trainer-form-spec').value = '';
+                document.getElementById('trainer-form-exp').value = '';
+                document.getElementById('trainer-form-email').value = '';
+            }
+            document.getElementById('modal-trainer').classList.remove('hidden');
+        }
+
+        function saveTrainerForm(e) {
+            e.preventDefault();
+            const id = document.getElementById('trainer-form-id').value;
+            const obj = {
+                id: id || 'trn-' + Date.now(),
+                name: document.getElementById('trainer-form-name').value,
+                specialization: document.getElementById('trainer-form-spec').value,
+                experience: document.getElementById('trainer-form-exp').value,
+                contact: document.getElementById('trainer-form-email').value,
+                photoUrl: 'https://images.unsplash.com/photo-1567013127542-490d757e51fc?auto=format&fit=crop&q=80&w=300'
+            };
+
+            if (id) {
+                state.trainers = state.trainers.map(t => t.id === id ? obj : t);
+            } else {
+                state.trainers.push(obj);
+            }
+            saveState('trainers', state.trainers);
+            closeModal('modal-trainer');
+            renderTrainersGrid();
+            showToast('Trainer details updated');
+        }
+
+        function editTrainer(id) { openTrainerModal(id); }
+        function deleteTrainer(id) {
+            state.trainers = state.trainers.filter(t => t.id !== id);
+            saveState('trainers', state.trainers);
+            renderTrainersGrid();
+            showToast('Trainer deleted', 'error');
+        }
+
+        function renderPlansGrid() {
+            document.getElementById('plans-grid-container').innerHTML = state.plans.map(p => `
+                <div class="p-6 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-lg font-bold text-white">${p.name}</h3>
+                            <button onclick="togglePlanActive('${p.id}')" class="px-2.5 py-1 rounded-full text-xs font-bold ${p.active ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-slate-800 text-slate-400'}">
+                                ${p.active ? 'Active' : 'Disabled'}
+                            </button>
+                        </div>
+                        <div class="text-3xl font-extrabold text-white mb-4">$${p.price}</div>
+                        <ul class="space-y-2 text-xs text-slate-300">
+                            ${p.features.map(f => `<li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i> ${f}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function togglePlanActive(id) {
+            state.plans = state.plans.map(p => p.id === id ? { ...p, active: !p.active } : p);
+            saveState('plans', state.plans);
+            renderPlansGrid();
+        }
+
+        function renderAttendanceLogs() {
+            const date = document.getElementById('attendance-date-picker').value;
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            // Quick list render
+            document.getElementById('attendance-quick-list').innerHTML = state.members.map(m => {
+                const logged = state.attendance.some(a => a.memberId === m.id && a.date === date);
+                return `
+                    <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+                        <div class="text-xs">
+                            <div class="font-bold text-white">${m.fullName}</div>
+                            <div class="text-slate-500">${m.plan}</div>
+                        </div>
+                        <button onclick="toggleAttendanceLog('${m.id}')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${logged ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">
+                            ${logged ? 'Present ✓' : 'Mark Entry'}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            // Logs table render
+            const logs = state.attendance.filter(a => a.date === date);
+            document.getElementById('attendance-table-body').innerHTML = logs.length ? logs.map(a => `
+                <tr>
+                    <td class="px-4 py-3 font-semibold text-white">${a.memberName}</td>
+                    <td class="px-4 py-3 text-slate-400">${a.date}</td>
+                    <td class="px-4 py-3 text-slate-400">${a.time}</td>
+                    <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 font-bold border border-emerald-800">Present</span></td>
+                </tr>
+            `).join('') : `<tr><td colSpan="4" class="text-center py-6 text-slate-500">No attendance entries for this date.</td></tr>`;
+        }
+
+        function toggleAttendanceLog(memberId) {
+            const date = document.getElementById('attendance-date-picker').value;
+            const member = state.members.find(m => m.id === memberId);
+            const index = state.attendance.findIndex(a => a.memberId === memberId && a.date === date);
+
+            if (index > -1) {
+                state.attendance.splice(index, 1);
+                showToast(`Marked ${member.fullName} as Absent`);
+            } else {
+                state.attendance.unshift({
+                    id: 'att-' + Date.now(),
+                    memberId: member.id,
+                    memberName: member.fullName,
+                    date: date,
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    status: 'Present'
+                });
+                showToast(`Check-in logged for ${member.fullName}!`);
+            }
+            saveState('attendance', state.attendance);
+            renderAttendanceLogs();
+        }
+
+        function populateAIMemberDropdown() {
+            const select = document.getElementById('ai-member-select');
+            select.innerHTML = state.members.map(m => `<option value="${m.id}">${m.fullName} (${m.goal || 'General Fitness'})</option>`).join('');
+        }
+
+        function generateAIWorkout() {
+            const memberId = document.getElementById('ai-member-select').value;
+            const goal = document.getElementById('ai-goal-select').value;
+            const member = state.members.find(m => m.id === memberId) || state.members[0];
+
+            const planText = `⚡ AI-GENERATED ROUTINE & MACROS: FOR ${member.fullName.toUpperCase()}
+Target Goal: ${goal} | Plan: ${member.plan}
+
+💪 DAY 1: PRIMARY COMPOUND STRENGTH
+• Bench Press / Heavy Squat: 4 Sets x 8-10 Reps
+• Overhead Shoulder Press: 3 Sets x 10 Reps
+• Tricep Cable Extensions: 4 Sets x 12 Reps
+• Treadmill Interval Sprint: 15 Mins
+
+🔥 DAY 2: PULL & CORE MASTERY
+• Lat Pulldowns / Barbell Deadlift: 4 Sets x 8 Reps
+• Seated Cable Rows: 3 Sets x 12 Reps
+• Bicep Dumbbell Curls: 3 Sets x 10 Reps
+• Hanging Leg Raises: 4 Sets x 15 Reps
+
+⚡ DAY 3: LOWER BODY & ATHLETIC CONDITIONING
+• Bulgarian Split Squats: 3 Sets x 10 Reps/leg
+• Leg Extensions & Curls Super-Set: 4 Sets x 12 Reps
+• Incline Walking: 20 Mins
+
+🥗 DIETARY MACRONUTRIENT RECOMMENDATION:
+• Protein Target: ~${member.gender === 'Male' ? '180g' : '135g'} / day
+• Hydration: Minimum 3.5 Liters Water Daily`;
+
+            document.getElementById('ai-output-box').innerText = planText;
+            showToast('Custom Routine Generated!');
+        }
+
+        function renderPaymentsTable() {
+            document.getElementById('payments-table-body').innerHTML = state.payments.map(p => `
+                <tr class="hover:bg-slate-800/40">
+                    <td class="px-6 py-4 font-mono font-bold text-white">${p.id}</td>
+                    <td class="px-6 py-4 font-semibold text-white">${p.memberName}</td>
+                    <td class="px-6 py-4 text-slate-400">${p.plan}</td>
+                    <td class="px-6 py-4 font-bold text-white">$${p.amount}</td>
+                    <td class="px-6 py-4"><span class="px-2.5 py-0.5 rounded-full font-bold text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800">${p.status}</span></td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="viewInvoice('${p.id}')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs inline-flex items-center gap-1">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> View Receipt
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function viewInvoice(id) {
+            const inv = state.payments.find(p => p.id === id);
+            if (!inv) return;
+            document.getElementById('inv-id').innerText = inv.id;
+            document.getElementById('inv-member').innerText = inv.memberName;
+            document.getElementById('inv-plan').innerText = inv.plan;
+            document.getElementById('inv-date').innerText = inv.date;
+            document.getElementById('inv-amount').innerText = '$' + inv.amount;
+            document.getElementById('modal-invoice').classList.remove('hidden');
+        }
+
+        function saveGymSettings() {
+            showToast('Facility settings updated!');
+        }
+    </script>
+</body>
+</html>
